@@ -369,6 +369,22 @@ def mundial():
     return Decimal(compra), Decimal(venta)
 
 
+@handle_exceptions
+def rio():
+    soup = None
+
+    url = "https://www.rio.com.py/endpoint/cotizaciones"
+    result = requests.get(url,
+                    timeout=10,
+                    headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36', 'x-requested-with': 'XMLHttpRequest', 'authority': 'www.rio.com.py'}).json()
+    for rate in result:
+        if rate["MONEDA"] == "DOLAR":
+            compra = rate["COMPRA"].strip().replace(',', '')
+            venta = rate["VENTA"].strip().replace(',', '')
+
+    return Decimal(compra), Decimal(venta)
+
+
 def create_json():
     mcompra, mventa = maxi()
     ccompra, cventa = chaco()
@@ -385,6 +401,7 @@ def create_json():
     visioncompra, visionventa = vision()
     bonanzacompra, bonanzaventa = bonanza()
     lamonedacompra, lamonedaventa = lamoneda()
+    riocompra, rioventa = rio()
 
     respjson = {
         "dolarpy": {
@@ -418,6 +435,10 @@ def create_json():
             'lamoneda': {
                 'compra': lamonedacompra,
                 'venta': lamonedaventa,
+            },
+            'rio': {
+                'compra': riocompra,
+                'venta': rioventa,
             }
         },
         "updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
